@@ -569,14 +569,15 @@ if (!isFirebaseConfigured) {
     }
     try {
       state.user = user;
-      await withTimeout(loadProfile());
-      await withTimeout(loadData());
       $("#loading").hidden = true;
       $("#app").hidden = false;
       window.dashboardReady = true;
       renderDashboard();
+      await withTimeout(loadProfile());
+      await withTimeout(loadData());
+      renderDashboard();
     } catch (error) {
-      showLoadError(error);
+      showNotice(error.message || "Your dashboard data could not be loaded. Check Firestore rules and try again.", "error");
     }
   });
 }

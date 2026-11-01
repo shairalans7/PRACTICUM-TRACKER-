@@ -33,6 +33,18 @@ const ACTIVITY_CATEGORIES = ["Technical Skills", "Administration", "Communicatio
 window.dashboardBooted = true;
 window.dashboardReady = false;
 
+window.addEventListener("error", event => {
+  if (!window.dashboardReady && document.querySelector("#loading")) {
+    showLoadError(event.error || new Error(event.message || "The dashboard script encountered an error."));
+  }
+});
+
+window.addEventListener("unhandledrejection", event => {
+  if (!window.dashboardReady && document.querySelector("#loading")) {
+    showLoadError(event.reason instanceof Error ? event.reason : new Error("Firebase initialization failed."));
+  }
+});
+
 function timeZone() {
   const candidate = state.profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Manila";
   try {

@@ -102,5 +102,13 @@
     <div class="dialog-body"><h2>Add activity</h2><form id="activityForm"><label for="taskTitle">Activity title</label><input id="taskTitle" required maxlength="200" placeholder="Updated project database"><label for="taskType">Category</label><select id="taskType"><option>Technical Skills</option><option>Administration</option><option>Communication</option><option>Other</option></select><label for="duration">Duration in hours</label><input id="duration" type="number" min="0.25" max="24" step="0.25" required><label for="activityDate">Date</label><input id="activityDate" type="date" required><label for="notes">Notes</label><textarea id="notes" rows="4" maxlength="2000"></textarea><div class="dialog-actions"><button id="closeActivity" class="cancel" type="button">Cancel</button><button id="saveActivity" class="button" type="submit">Save activity</button></div></form></div>
   </dialog>
   <script type="module" src="assets/dashboard.js"></script>
+  <script>
+    setTimeout(() => {
+      const loading = document.querySelector("#loading");
+      if (loading && !loading.hidden && !window.dashboardBooted) {
+        loading.innerHTML = "<h2>Dashboard script did not load</h2><p>Check your internet connection and reload the page.</p>";
+      }
+    }, 8000);
+  </script>
 </body>
 </html>

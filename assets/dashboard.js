@@ -19,6 +19,7 @@ import {
 
 const $ = selector => document.querySelector(selector);
 const state = { user: null, profile: null, shifts: [], activities: [], activeShift: null };
+window.dashboardBooted = true;
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -58,8 +59,14 @@ function showNotice(text, type = "success") {
 }
 
 function showFirebaseSetupMessage() {
+  $("#loading").hidden = true;
   $("#setupNotice").hidden = false;
   $("#app").hidden = true;
+}
+
+function showLoadError(error) {
+  $("#loading").hidden = false;
+  $("#loading").innerHTML = `<h2>Dashboard could not load</h2><p>${escapeHtml(error.message || "Check Firebase Authentication, Firestore, and Security Rules.")}</p><p>Confirm that Firestore is created and <code>firestore.rules</code> has been published.</p>`;
 }
 
 async function loadProfile() {
@@ -223,7 +230,7 @@ if (!isFirebaseConfigured) {
       $("#app").hidden = false;
       renderDashboard();
     } catch (error) {
-      showNotice(error.message, "error");
+      showLoadError(error);
     }
   });
 }

@@ -9,6 +9,7 @@ import {
   setDoc,
   serverTimestamp,
   signInWithEmailAndPassword,
+  signOut,
   updateProfile
 } from "./firebase.js";
 
@@ -22,6 +23,7 @@ const passwordInput = document.querySelector("#password");
 const message = document.querySelector("#message");
 const forgotButton = document.querySelector("#forgotButton");
 let registerMode = false;
+let authActionInProgress = false;
 
 function showMessage(text, type = "error") {
   message.textContent = text;
@@ -38,7 +40,10 @@ function friendlyError(error) {
     "auth/operation-not-allowed": "Enable Email/Password in Firebase Console > Authentication > Sign-in method.",
     "auth/unauthorized-domain": "Add localhost and 127.0.0.1 under Firebase Console > Authentication > Settings > Authorized domains."
   };
-  return messages[error.code] || error.message || "Authentication failed.";
+  if (error?.code?.startsWith("permission-denied")) {
+    return "Your account was created, but the profile could not be saved. Publish the current Firestore rules, then try signing in again.";
+  }
+  return messages[error.code] || "Authentication failed. Please try again.";
 }
 
 function setMode() {
@@ -55,6 +60,7 @@ if (!isFirebaseConfigured) {
   form.querySelectorAll("input, button").forEach(element => {
     if (element !== modeButton) element.disabled = true;
   });
+  forgotButton.disabled = true;
 }
 
 modeButton.addEventListener("click", () => {
@@ -79,6 +85,9 @@ forgotButton.addEventListener("click", async () => {
 form.addEventListener("submit", async event => {
   event.preventDefault();
   submitButton.disabled = true;
+  modeButton.disabled = true;
+  forgotButton.disabled = true;
+  authActionInProgress = true;
   showMessage("", "hidden");
 
   try {
@@ -106,15 +115,21 @@ form.addEventListener("submit", async event => {
 
     if (user) window.location.href = "index.html";
   } catch (error) {
+    if (registerMode && auth.currentUser) {
+      await signOut(auth).catch(() => {});
+    }
     showMessage(friendlyError(error));
   } finally {
+    authActionInProgress = false;
     submitButton.disabled = false;
+    modeButton.disabled = false;
+    forgotButton.disabled = false;
   }
 });
 
 if (isFirebaseConfigured) {
   onAuthStateChanged(auth, user => {
-    if (user) window.location.href = "index.html";
+    if (user && !authActionInProgress) window.location.href = "index.html";
   });
 }
 

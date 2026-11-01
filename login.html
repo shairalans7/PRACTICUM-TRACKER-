@@ -5,28 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PracticumFlow | Sign in</title>
   <style>
-    :root { color-scheme: light; font-family: Inter, Segoe UI, Arial, sans-serif; color: #17324d; background: #f4f8fb; }
+    :root { color-scheme: light; font-family: Inter, Segoe UI, Arial, sans-serif; color: #17324d; background: #f4f8fb; --page: #eef5f8; --text: #17324d; --muted: #82909f; --surface: #ffffffad; --border: #ffffffa8; --accent: #19344f; --shadow: #17324d22; }
+    :root[data-theme="dark"] { color-scheme: dark; --page: #0d1724; --text: #e8f1f8; --muted: #a6b5c4; --surface: #17283acc; --border: #ffffff1c; --accent: #b8ead1; --shadow: #00000055; }
     * { box-sizing: border-box; }
-    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: linear-gradient(135deg, #eaf4fb, #f8fbfd); }
-    .card { width: min(100%, 430px); padding: 34px; border: 1px solid #e2ebf2; border-radius: 24px; background: #fff; box-shadow: 0 20px 60px #17324d14; }
-    h1 { margin: 0; color: #19344f; font-size: 28px; }
-    .subtitle { margin: 6px 0 26px; color: #82909f; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; color: var(--text); background: radial-gradient(circle at 10% 0%, #b9e7dc55, transparent 35%), radial-gradient(circle at 100% 100%, #b9d8f855, transparent 38%), var(--page); transition: background .25s, color .25s; }
+    .card { position: relative; width: min(100%, 430px); padding: 34px; border: 1px solid var(--border); border-radius: 24px; background: var(--surface); box-shadow: 0 20px 60px var(--shadow); backdrop-filter: blur(24px); }
+    h1 { margin: 0; color: var(--text); font-size: 28px; }
+    .subtitle { margin: 6px 0 26px; color: var(--muted); }
     label { display: block; margin: 16px 0 7px; font-size: 13px; font-weight: 700; }
-    input { width: 100%; padding: 13px 14px; border: 1px solid #d8e4ec; border-radius: 11px; font: inherit; }
+    input { width: 100%; padding: 13px 14px; border: 1px solid var(--border); border-radius: 11px; color: var(--text); background: #ffffff22; font: inherit; }
     input:focus { outline: 3px solid #bce7d255; border-color: #67aa88; }
-    button { width: 100%; margin-top: 20px; padding: 13px 16px; border: 0; border-radius: 11px; background: #19344f; color: #fff; font-weight: 700; cursor: pointer; }
+    button { width: 100%; margin-top: 20px; padding: 13px 16px; border: 0; border-radius: 11px; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; }
+    :root[data-theme="dark"] button:not(.secondary):not(.link) { color: #102031; }
     button:disabled { cursor: not-allowed; opacity: .55; }
     .secondary { margin-top: 12px; background: transparent; color: #356b8c; }
     .link { margin-top: 16px; padding: 0; background: transparent; color: #356b8c; font-size: 13px; }
     .message { min-height: 20px; margin-top: 16px; padding: 10px; border-radius: 10px; font-size: 13px; }
     .message.hidden { visibility: hidden; }
-    .message.error { background: #fff0f0; color: #a63d3d; }
-    .message.success { background: #effaf4; color: #25734c; }
+    .message.error { background: #8d3c3c44; color: #a63d3d; }
+    :root[data-theme="dark"] .message.error { color: #ffbaba; }
+    .message.success { background: #b9e7dc44; color: #25734c; }
+    .theme-toggle { position: absolute; top: 18px; right: 18px; width: 42px; height: 42px; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: #ffffff22 !important; color: var(--text) !important; font-size: 20px; }
     [hidden] { display: none !important; }
   </style>
 </head>
 <body>
   <main class="card">
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark mode">☾</button>
     <h1>PracticumFlow</h1>
     <p class="subtitle">Track your practicum hours and activities.</p>
     <form id="authForm">
@@ -44,6 +49,7 @@
     <button id="modeButton" class="secondary" type="button">Create a new account</button>
     <div id="message" class="message hidden" role="status"></div>
   </main>
+  <script src="assets/theme.js"></script>
   <script type="module" src="assets/login.js"></script>
 </body>
 </html>

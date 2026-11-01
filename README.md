@@ -43,12 +43,18 @@ The browser Firebase configuration is not a password. Security comes from Fireba
 2. Start Apache through XAMPP, or run `php -S 127.0.0.1:8000` from this folder.
 3. Open `http://127.0.0.1:8000/login.php`.
 
+## Implemented foundation features
+
+- Dashboard, Time Logs, Activity Logs, Competencies, Reports, and Settings/Profile sections.
+- Activity search, category/date filters, edit, and delete actions.
+- Report date range, category totals, CSV download, and print/PDF-friendly layout.
+- Profile values for full name, target hours, daily minutes, and timezone.
+
 ## Next implementation steps
 
-1. Add settings for total hours, daily minutes, and timezone.
-2. Add full Time Logs, Activity Logs, Competencies, and Reports pages.
-3. Add Firebase Emulator Suite tests before production deployment.
-4. Keep all Admin SDK credentials out of source control.
+1. Publish the latest `firestore.rules` in Firebase Console and test every write action.
+2. Add Firebase Emulator Suite tests before production deployment.
+3. Keep all Admin SDK credentials out of source control.
 
 ## GitHub Pages
 

@@ -11,6 +11,7 @@ import {
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -39,6 +40,7 @@ export {
   collection,
   createUserWithEmailAndPassword,
   db,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,

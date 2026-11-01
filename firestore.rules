@@ -2,24 +2,108 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function owns(data) {
+      return signedIn() && data.userId == request.auth.uid;
+    }
+
     match /profiles/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if signedIn() && request.auth.uid == userId;
+
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          'fullName', 'email', 'targetHours', 'dailyMinutes', 'timezone', 'updatedAt'
+        ])
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() >= 1
+        && request.resource.data.fullName.size() <= 120
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.targetHours is number
+        && request.resource.data.targetHours > 0
+        && request.resource.data.targetHours <= 1000
+        && request.resource.data.dailyMinutes is int
+        && request.resource.data.dailyMinutes >= 1
+        && request.resource.data.dailyMinutes <= 1440
+        && request.resource.data.timezone is string
+        && request.resource.data.timezone.size() >= 3
+        && request.resource.data.timezone.size() <= 80;
     }
 
     match /shifts/{shiftId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == request.auth.uid;
+      allow create: if owns(request.resource.data)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'start', 'end', 'durationSeconds', 'createdAt'
+        ])
+        && request.resource.data.start is timestamp
+        && request.resource.data.end == null
+        && request.resource.data.durationSeconds is number
+        && request.resource.data.durationSeconds == 0
+        && request.resource.data.createdAt == request.time;
+
+      allow read, delete: if owns(resource.data);
+
+      // A shift can only be clocked out once. The owner and start time are immutable.
+      allow update: if owns(resource.data)
+        && owns(request.resource.data)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'start', 'end', 'durationSeconds', 'createdAt'
+        ])
+        && resource.data.userId == request.resource.data.userId
+        && resource.data.start == request.resource.data.start
+        && resource.data.createdAt == request.resource.data.createdAt
+        && resource.data.end == null
+        && request.resource.data.end is timestamp
+        && request.resource.data.end <= request.time
+        && request.resource.data.durationSeconds is number
+        && request.resource.data.durationSeconds >= 0
+        && request.resource.data.durationSeconds <= 86400;
     }
 
     match /activities/{activityId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == request.auth.uid;
+      allow create: if owns(request.resource.data)
+        && request.resource.data.keys().hasOnly([
+          'userId', 'title', 'category', 'minutes', 'date', 'notes', 'createdAt'
+        ])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.category in [
+          'Technical Skills', 'Administration', 'Communication', 'Other'
+        ]
+        && request.resource.data.minutes is int
+        && request.resource.data.minutes >= 15
+        && request.resource.data.minutes <= 1440
+        && request.resource.data.date is string
+        && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 2000
+        && request.resource.data.createdAt == request.time;
+
+      allow read, delete: if owns(resource.data);
+      allow update: if owns(resource.data)
+        && owns(request.resource.data)
+        && resource.data.userId == request.resource.data.userId
+        && resource.data.createdAt == request.resource.data.createdAt
+        && request.resource.data.keys().hasOnly([
+          'userId', 'title', 'category', 'minutes', 'date', 'notes', 'createdAt'
+        ])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.category in [
+          'Technical Skills', 'Administration', 'Communication', 'Other'
+        ]
+        && request.resource.data.minutes is int
+        && request.resource.data.minutes >= 15
+        && request.resource.data.minutes <= 1440
+        && request.resource.data.date is string
+        && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.notes is string
+        && request.resource.data.notes.size() <= 2000;
     }
   }
 }

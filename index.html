@@ -65,6 +65,92 @@
     [hidden] { display: none !important; }
     @media (max-width: 900px) { .layout { display: block; } aside { width: 100%; gap: 20px; } .profile { display: none; } main { padding: 20px; } .stats { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } }
     @media (max-width: 540px) { .topbar, .timer { display: block; } .topbar .button, .timer .button { width: 100%; margin-top: 15px; } .timer-display { font-size: 38px; } }
+
+    :root {
+      color-scheme: light;
+      --page: #eef5f8;
+      --text: #21354c;
+      --muted: #718194;
+      --border: #ffffff9c;
+      --surface: #ffffffad;
+      --surface-strong: #ffffffd9;
+      --sidebar: #19344fd9;
+      --sidebar-soft: #2a4b68b8;
+      --accent: #19344f;
+      --accent-soft: #e9f5ee;
+      --line: #ffffff80;
+      --shadow: #17324d1c;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --page: #0d1724;
+      --text: #e8f1f8;
+      --muted: #a6b5c4;
+      --border: #ffffff1c;
+      --surface: #17283acc;
+      --surface-strong: #1d3047e8;
+      --sidebar: #081522dc;
+      --sidebar-soft: #1d3953cc;
+      --accent: #b8ead1;
+      --accent-soft: #214b3a;
+      --line: #ffffff16;
+      --shadow: #00000055;
+    }
+    body { color: var(--text); background: radial-gradient(circle at 10% 0%, #b9e7dc55, transparent 34%), radial-gradient(circle at 100% 20%, #b9d8f855, transparent 32%), var(--page); transition: background .25s, color .25s; }
+    aside { background: var(--sidebar); box-shadow: 16px 0 50px var(--shadow); backdrop-filter: blur(24px); }
+    nav span { color: #d5e4ee; }
+    nav span.active, nav span:hover { background: var(--surface-strong); color: var(--text); }
+    .profile { background: var(--sidebar-soft); border: 1px solid var(--border); }
+    .card, .setup { border-color: var(--border); background: var(--surface); box-shadow: 0 16px 45px var(--shadow); backdrop-filter: blur(22px); }
+    .timer { background: linear-gradient(135deg, #19344fe8, #2c6b72d9); box-shadow: 0 18px 42px var(--shadow); }
+    .muted, .stat-label, .activity-row p, .card-footer { color: var(--muted); }
+    .button { background: var(--accent); color: #fff; box-shadow: 0 8px 20px var(--shadow); }
+    :root[data-theme="dark"] .button { color: #102031; }
+    .button.light { background: var(--accent-soft); color: var(--text); }
+    .progress-track { background: var(--line); }
+    .activity-row, .competency-row { border-color: var(--line); }
+    .tag { background: #b9e7dc38; color: var(--text); }
+    .duration, .competency-row strong { color: #4a9b91; }
+    .notice { background: var(--accent-soft); color: var(--text); border: 1px solid var(--border); }
+    .notice.error { background: #8d3c3c44; color: #ffbaba; }
+    dialog { color: var(--text); background: var(--surface-strong); backdrop-filter: blur(22px); }
+    dialog::backdrop { background: #07111db8; backdrop-filter: blur(5px); }
+    .dialog-body input, .dialog-body select, .dialog-body textarea { color: var(--text); background: #ffffff1a; border-color: var(--border); }
+    .dialog-actions .cancel { background: var(--line); color: var(--text); }
+    .theme-toggle { width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--text); font-size: 20px; box-shadow: 0 8px 20px var(--shadow); }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .view-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .view-toolbar h1 { margin-bottom: 4px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th, .data-table td { padding: 14px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .data-table th { color: var(--muted); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+    .data-table td strong { display: block; margin-bottom: 4px; }
+    .status-pill { display: inline-block; padding: 4px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--text); font-size: 11px; font-weight: 700; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+    .summary-grid .card h3 { margin: 0 0 7px; font-size: 13px; color: var(--muted); }
+    .summary-grid .card strong { font-size: 25px; }
+    .report-actions { display: flex; gap: 10px; align-items: center; }
+    .table-action { padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--line); color: var(--text); font-size: 12px; font-weight: 700; }
+    .table-action.danger { color: #d96c6c; }
+    .filter-bar { display: grid; grid-template-columns: 1.5fr 1fr 1fr auto; gap: 10px; margin-bottom: 16px; }
+    .filter-bar input, .filter-bar select { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 9px; color: var(--text); background: #ffffff1a; }
+    .filter-clear { padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--line); color: var(--text); }
+    .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .settings-grid .field { display: grid; gap: 7px; }
+    .settings-grid label { font-size: 13px; font-weight: 700; }
+    .settings-grid input, .settings-grid select { padding: 12px; border: 1px solid var(--border); border-radius: 9px; color: var(--text); background: #ffffff1a; }
+    .settings-grid .wide { grid-column: 1 / -1; }
+    @media print {
+      body * { visibility: hidden !important; }
+      #reportsView, #reportsView * { visibility: visible !important; }
+      #reportsView { position: absolute; left: 0; top: 0; width: 100%; }
+      #reportsView .view-toolbar button, #reportsView .filter-bar { display: none !important; }
+      .card { box-shadow: none !important; border: 1px solid #ddd !important; background: #fff !important; color: #111 !important; }
+    }
+    .nav-button { width: 100%; padding: 12px 14px; border: 0; border-radius: 10px; background: transparent; color: #c9d8e5; text-align: left; }
+    .nav-button.active, .nav-button:hover { background: var(--surface-strong); color: var(--text); }
+    @media (max-width: 700px) { .data-table { min-width: 680px; } .table-scroll { overflow-x: auto; } .summary-grid { grid-template-columns: 1fr; } .view-toolbar { align-items: flex-start; flex-direction: column; } }
+    @media (max-width: 540px) { .topbar-actions { margin-top: 15px; } .topbar-actions .button { margin-top: 0; } }
   </style>
 </head>
 <body>
@@ -77,12 +163,13 @@
     <aside>
       <div>
         <div class="brand">PracticumFlow<small>Internship tracker</small></div>
-        <nav><span class="active">Dashboard</span><span>Time logs</span><span>Activity logs</span><span>Competencies</span><span>Reports</span></nav>
+        <nav aria-label="Main navigation"><button class="nav-button active" data-view="dashboard" type="button">Dashboard</button><button class="nav-button" data-view="timeLogs" type="button">Time logs</button><button class="nav-button" data-view="activityLogs" type="button">Activity logs</button><button class="nav-button" data-view="competencies" type="button">Competencies</button><button class="nav-button" data-view="reports" type="button">Reports</button><button class="nav-button" data-view="settings" type="button">Settings / Profile</button></nav>
       </div>
-      <div class="profile"><strong id="userName">Student Intern</strong><small id="userEmail"></small><button id="signOut" type="button">Sign out</button></div>
+      <div class="profile"><strong id="userName">Student Intern</strong><small id="userEmail"></small><button id="openSettings" type="button">Settings</button><button id="signOut" type="button">Sign out</button></div>
     </aside>
     <main>
-      <div class="topbar"><div><h1>Dashboard</h1><div id="todayLabel" class="muted"></div></div><button id="openActivity" class="button" type="button">+ Add activity</button></div>
+      <div id="dashboardView" class="view">
+      <div class="topbar"><div><h1>Dashboard</h1><div id="todayLabel" class="muted"></div></div><div class="topbar-actions"><button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark mode">☾</button><button id="openActivity" class="button" type="button">+ Add activity</button></div></div>
       <section class="timer"><div><div id="timerStatus" class="timer-status">Ready when you are</div><div id="timerDisplay" class="timer-display">00:00:00</div><div class="muted">Your clocked time is saved in Firestore.</div></div><button id="clockButton" class="button light" type="button">Clock in</button></section>
       <div class="stats">
         <div class="card"><div class="stat-label">This week</div><div id="weekHours" class="stat-value">0.0h</div><div class="stat-label">Clocked time</div></div>
@@ -95,12 +182,47 @@
         <section class="card"><h2>Competencies</h2><p class="muted">Based on saved activity categories.</p><div id="competencyList"></div></section>
       </div>
       <section class="card" style="margin-top:18px"><div class="topbar" style="margin-bottom:0"><div><h2>Recent activities</h2><p class="muted">Your latest work entries.</p></div><button id="openActivityBottom" class="button" type="button">Add activity</button></div><div id="activityList" class="activity-list"></div></section>
+      </div>
+      <section id="timeLogsView" class="view" hidden>
+        <div class="view-toolbar"><div><h1>Time logs</h1><p class="muted">Every clocked shift saved to your account.</p></div><button id="timeLogsClock" class="button" type="button">Clock in</button></div>
+        <div class="card table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Start</th><th>End</th><th>Duration</th><th>Status</th></tr></thead><tbody id="timeLogsList"></tbody></table></div>
+      </section>
+      <section id="activityLogsView" class="view" hidden>
+        <div class="view-toolbar"><div><h1>Activity logs</h1><p class="muted">Your practicum tasks and notes.</p></div><button id="openActivityLogs" class="button" type="button">+ Add activity</button></div>
+        <div class="filter-bar"><input id="activitySearch" type="search" placeholder="Search title or notes" aria-label="Search activities"><select id="activityCategoryFilter" aria-label="Filter by category"><option value="">All categories</option><option>Technical Skills</option><option>Administration</option><option>Communication</option><option>Other</option></select><input id="activityDateFilter" type="date" aria-label="Filter by date"><button id="clearActivityFilters" class="filter-clear" type="button">Clear</button></div>
+        <div class="card table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Activity</th><th>Category</th><th>Duration</th><th>Notes</th><th>Action</th></tr></thead><tbody id="activityLogsList"></tbody></table></div>
+      </section>
+      <section id="competenciesView" class="view" hidden>
+        <div class="view-toolbar"><div><h1>Competencies</h1><p class="muted">A breakdown of your recorded activity categories.</p></div></div>
+        <div id="competencySummary" class="summary-grid"></div>
+        <div class="card"><div id="competencyDetails"></div></div>
+      </section>
+      <section id="reportsView" class="view" hidden>
+        <div class="view-toolbar"><div><h1>Reports</h1><p class="muted">A quick summary of your practicum progress.</p></div><div class="report-actions"><button id="printReport" class="filter-clear" type="button">Print / PDF</button><button id="exportReport" class="button" type="button">Download CSV</button></div></div>
+        <div class="filter-bar"><label class="muted">From <input id="reportStart" type="date"></label><label class="muted">To <input id="reportEnd" type="date"></label><span></span><button id="clearReportRange" class="filter-clear" type="button">Clear dates</button></div>
+        <div id="reportSummary" class="summary-grid"></div>
+        <div class="card table-scroll"><table class="data-table"><thead><tr><th>Category</th><th>Activities</th><th>Minutes</th><th>Hours</th></tr></thead><tbody id="reportList"></tbody></table></div>
+      </section>
+      <section id="settingsView" class="view" hidden>
+        <div class="view-toolbar"><div><h1>Settings / Profile</h1><p class="muted">Update the practicum requirements used by your dashboard.</p></div></div>
+        <form id="profileSettingsForm" class="card settings-grid">
+          <div class="field wide"><label for="profileName">Full name</label><input id="profileName" required maxlength="120"></div>
+          <div class="field"><label for="profileHours">Target hours</label><input id="profileHours" type="number" min="1" max="1000" step="0.25" required></div>
+          <div class="field"><label for="profileDailyMinutes">Daily minutes</label><input id="profileDailyMinutes" type="number" min="1" max="1440" step="1" required></div>
+          <div class="field"><label for="profileTimezone">Timezone</label><select id="profileTimezone"><option value="Asia/Manila">Asia/Manila</option><option value="Asia/Singapore">Asia/Singapore</option><option value="UTC">UTC</option><option value="America/New_York">America/New_York</option><option value="Europe/London">Europe/London</option></select></div>
+          <div class="field wide"><button id="saveProfileSettings" class="button" type="submit">Save profile settings</button></div>
+        </form>
+      </section>
     </main>
   </div>
   <div id="notice" class="notice" hidden></div>
   <dialog id="activityModal">
-    <div class="dialog-body"><h2>Add activity</h2><form id="activityForm"><label for="taskTitle">Activity title</label><input id="taskTitle" required maxlength="200" placeholder="Updated project database"><label for="taskType">Category</label><select id="taskType"><option>Technical Skills</option><option>Administration</option><option>Communication</option><option>Other</option></select><label for="duration">Duration in hours</label><input id="duration" type="number" min="0.25" max="24" step="0.25" required><label for="activityDate">Date</label><input id="activityDate" type="date" required><label for="notes">Notes</label><textarea id="notes" rows="4" maxlength="2000"></textarea><div class="dialog-actions"><button id="closeActivity" class="cancel" type="button">Cancel</button><button id="saveActivity" class="button" type="submit">Save activity</button></div></form></div>
+    <div class="dialog-body"><h2 id="activityModalTitle">Add activity</h2><form id="activityForm"><label for="taskTitle">Activity title</label><input id="taskTitle" required maxlength="200" placeholder="Updated project database"><label for="taskType">Category</label><select id="taskType"><option>Technical Skills</option><option>Administration</option><option>Communication</option><option>Other</option></select><label for="duration">Duration in hours</label><input id="duration" type="number" min="0.25" max="24" step="0.25" required><label for="activityDate">Date</label><input id="activityDate" type="date" required><label for="notes">Notes</label><textarea id="notes" rows="4" maxlength="2000"></textarea><div class="dialog-actions"><button id="closeActivity" class="cancel" type="button">Cancel</button><button id="saveActivity" class="button" type="submit">Save activity</button></div></form></div>
   </dialog>
+  <dialog id="settingsModal">
+    <div class="dialog-body"><h2>Practicum settings</h2><p class="muted">These values control your dashboard progress and date calculations.</p><form id="settingsForm"><label for="settingsName">Full name</label><input id="settingsName" required maxlength="120"><label for="settingsHours">Total practicum hours</label><input id="settingsHours" type="number" min="1" max="1000" step="0.25" required><label for="settingsDailyMinutes">Daily minutes</label><input id="settingsDailyMinutes" type="number" min="1" max="1440" step="1" required><label for="settingsTimezone">Timezone</label><select id="settingsTimezone"><option value="Asia/Manila">Asia/Manila</option><option value="Asia/Singapore">Asia/Singapore</option><option value="UTC">UTC</option><option value="America/New_York">America/New_York</option><option value="Europe/London">Europe/London</option></select><div class="dialog-actions"><button id="closeSettings" class="cancel" type="button">Cancel</button><button id="saveSettings" class="button" type="submit">Save settings</button></div></form></div>
+  </dialog>
+  <script src="assets/theme.js"></script>
   <script type="module" src="assets/dashboard.js"></script>
   <script>
     setTimeout(() => {

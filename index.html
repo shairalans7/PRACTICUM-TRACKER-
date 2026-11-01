@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PracticumFlow | Dashboard</title>
+  <style>
+    :root { font-family: Inter, Segoe UI, Arial, sans-serif; color: #21354c; background: #f6f8fa; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .layout { min-height: 100vh; display: flex; }
+    aside { width: 245px; padding: 28px 18px; display: flex; flex-direction: column; justify-content: space-between; background: #19344f; color: #fff; }
+    .brand { margin: 0 10px 35px; font-size: 20px; font-weight: 800; }
+    .brand small { display: block; margin-top: 5px; color: #b8cbdc; font-size: 12px; font-weight: 400; }
+    nav { display: grid; gap: 8px; }
+    nav span { padding: 12px 14px; border-radius: 10px; color: #c9d8e5; font-size: 14px; }
+    nav span.active, nav span:hover { background: #fff; color: #19344f; }
+    .profile { padding: 14px; border-radius: 15px; background: #2a4b68; overflow-wrap: anywhere; }
+    .profile strong { display: block; font-size: 14px; }
+    .profile small { color: #c5d4e0; font-size: 12px; }
+    .profile button { width: 100%; margin-top: 14px; padding: 9px; border: 0; border-radius: 9px; background: #ffffff18; color: #ffd1d1; text-align: left; }
+    main { width: 100%; max-width: 1500px; margin: 0 auto; padding: 30px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 5px; font-size: 29px; }
+    h2 { margin-bottom: 4px; font-size: 18px; }
+    .muted { color: #82909f; font-size: 13px; }
+    .button { padding: 12px 16px; border: 0; border-radius: 10px; background: #19344f; color: #fff; font-weight: 700; }
+    .button.light { background: #e9f5ee; color: #245c43; }
+    .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0; }
+    .card { padding: 22px; border: 1px solid #e5edf2; border-radius: 18px; background: #fff; box-shadow: 0 8px 24px #17324d08; }
+    .timer { min-height: 180px; display: flex; justify-content: space-between; align-items: center; padding: 26px; border-radius: 20px; background: #19344f; color: #fff; }
+    .timer-status { color: #bce7d2; font-size: 13px; }
+    .timer-display { margin: 13px 0; font-size: 50px; font-weight: 800; font-family: Consolas, monospace; }
+    .progress-number { margin: 15px 0 10px; font-size: 30px; font-weight: 800; }
+    .progress-number span { color: #82909f; font-size: 14px; font-weight: 500; }
+    .progress-track { height: 10px; overflow: hidden; border-radius: 20px; background: #e9eef2; }
+    .progress-bar { width: 0; height: 100%; background: #64a58b; transition: width .25s; }
+    .stat-label { color: #82909f; font-size: 12px; }
+    .stat-value { margin: 8px 0 2px; font-size: 22px; font-weight: 800; }
+    .activity-list { display: grid; gap: 2px; }
+    .activity-row { display: flex; justify-content: space-between; gap: 15px; padding: 15px 0; border-bottom: 1px solid #edf1f4; }
+    .activity-row strong { display: block; margin-top: 7px; }
+    .activity-row p { margin: 5px 0 0; color: #82909f; font-size: 13px; white-space: pre-line; }
+    .tag { display: inline-block; padding: 4px 8px; border-radius: 6px; background: #eef5f8; color: #356b8c; font-size: 11px; font-weight: 700; }
+    .duration { color: #356b8c; font-weight: 800; white-space: nowrap; }
+    .competency-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #edf1f4; font-size: 14px; }
+    .competency-row strong { color: #356b8c; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; color: #82909f; font-size: 12px; }
+    .empty { padding: 30px 0; color: #82909f; text-align: center; }
+    .notice { position: fixed; right: 22px; bottom: 22px; max-width: 360px; padding: 13px 16px; border-radius: 10px; background: #e9f5ee; color: #245c43; box-shadow: 0 10px 30px #17324d22; }
+    .notice.error { background: #fff0f0; color: #a63d3d; }
+    .setup { max-width: 680px; margin: 15vh auto; padding: 30px; border: 1px solid #f0d9a8; border-radius: 18px; background: #fff8e9; color: #795d25; }
+    dialog { width: min(100% - 30px, 500px); padding: 0; border: 0; border-radius: 18px; box-shadow: 0 20px 80px #17324d33; }
+    dialog::backdrop { background: #17324d88; }
+    .dialog-body { padding: 25px; }
+    .dialog-body label { display: block; margin: 13px 0 6px; font-size: 13px; font-weight: 700; }
+    .dialog-body input, .dialog-body select, .dialog-body textarea { width: 100%; padding: 11px; border: 1px solid #d8e4ec; border-radius: 9px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .dialog-actions button { padding: 10px 14px; border: 0; border-radius: 9px; }
+    .dialog-actions .cancel { background: #eef3f6; color: #456; }
+    [hidden] { display: none !important; }
+    @media (max-width: 900px) { .layout { display: block; } aside { width: 100%; gap: 20px; } .profile { display: none; } main { padding: 20px; } .stats { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 540px) { .topbar, .timer { display: block; } .topbar .button, .timer .button { width: 100%; margin-top: 15px; } .timer-display { font-size: 38px; } }
+  </style>
+</head>
+<body>
+  <div id="setupNotice" class="setup" hidden>
+    <h2>Firebase configuration required</h2>
+    <p>Open <code>assets/firebase-config.js</code> and paste the Firebase Web App configuration from your Firebase console.</p>
+  </div>
+  <div id="loading" class="setup">Loading PracticumFlow...</div>
+  <div id="app" class="layout" hidden>
+    <aside>
+      <div>
+        <div class="brand">PracticumFlow<small>Internship tracker</small></div>
+        <nav><span class="active">Dashboard</span><span>Time logs</span><span>Activity logs</span><span>Competencies</span><span>Reports</span></nav>
+      </div>
+      <div class="profile"><strong id="userName">Student Intern</strong><small id="userEmail"></small><button id="signOut" type="button">Sign out</button></div>
+    </aside>
+    <main>
+      <div class="topbar"><div><h1>Dashboard</h1><div id="todayLabel" class="muted"></div></div><button id="openActivity" class="button" type="button">+ Add activity</button></div>
+      <section class="timer"><div><div id="timerStatus" class="timer-status">Ready when you are</div><div id="timerDisplay" class="timer-display">00:00:00</div><div class="muted">Your clocked time is saved in Firestore.</div></div><button id="clockButton" class="button light" type="button">Clock in</button></section>
+      <div class="stats">
+        <div class="card"><div class="stat-label">This week</div><div id="weekHours" class="stat-value">0.0h</div><div class="stat-label">Clocked time</div></div>
+        <div class="card"><div class="stat-label">Today</div><div id="todayHours" class="stat-value">0.0h</div><div class="stat-label">Clocked time</div></div>
+        <div class="card"><div class="stat-label">Activities</div><div id="taskCount" class="stat-value">0</div><div class="stat-label">Entries saved</div></div>
+        <div class="card"><div class="stat-label">Goal</div><div id="hoursRemaining" class="stat-value">243.0h</div><div class="stat-label">Remaining</div></div>
+      </div>
+      <div class="grid">
+        <section class="card"><h2>Practicum progress</h2><div class="progress-number"><span id="hoursCompleted">0.0h</span> <span>/ target</span></div><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><div class="card-footer"><strong id="progressPercent">0% completed</strong><span>Clocked shifts</span></div></section>
+        <section class="card"><h2>Competencies</h2><p class="muted">Based on saved activity categories.</p><div id="competencyList"></div></section>
+      </div>
+      <section class="card" style="margin-top:18px"><div class="topbar" style="margin-bottom:0"><div><h2>Recent activities</h2><p class="muted">Your latest work entries.</p></div><button id="openActivityBottom" class="button" type="button">Add activity</button></div><div id="activityList" class="activity-list"></div></section>
+    </main>
+  </div>
+  <div id="notice" class="notice" hidden></div>
+  <dialog id="activityModal">
+    <div class="dialog-body"><h2>Add activity</h2><form id="activityForm"><label for="taskTitle">Activity title</label><input id="taskTitle" required maxlength="200" placeholder="Updated project database"><label for="taskType">Category</label><select id="taskType"><option>Technical Skills</option><option>Administration</option><option>Communication</option><option>Other</option></select><label for="duration">Duration in hours</label><input id="duration" type="number" min="0.25" max="24" step="0.25" required><label for="activityDate">Date</label><input id="activityDate" type="date" required><label for="notes">Notes</label><textarea id="notes" rows="4" maxlength="2000"></textarea><div class="dialog-actions"><button id="closeActivity" class="cancel" type="button">Cancel</button><button id="saveActivity" class="button" type="submit">Save activity</button></div></form></div>
+  </dialog>
+  <script type="module" src="assets/dashboard.js"></script>
+</body>
+</html>

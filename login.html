@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PracticumFlow | Sign in</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, Segoe UI, Arial, sans-serif; color: #17324d; background: #f4f8fb; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: linear-gradient(135deg, #eaf4fb, #f8fbfd); }
+    .card { width: min(100%, 430px); padding: 34px; border: 1px solid #e2ebf2; border-radius: 24px; background: #fff; box-shadow: 0 20px 60px #17324d14; }
+    h1 { margin: 0; color: #19344f; font-size: 28px; }
+    .subtitle { margin: 6px 0 26px; color: #82909f; }
+    label { display: block; margin: 16px 0 7px; font-size: 13px; font-weight: 700; }
+    input { width: 100%; padding: 13px 14px; border: 1px solid #d8e4ec; border-radius: 11px; font: inherit; }
+    input:focus { outline: 3px solid #bce7d255; border-color: #67aa88; }
+    button { width: 100%; margin-top: 20px; padding: 13px 16px; border: 0; border-radius: 11px; background: #19344f; color: #fff; font-weight: 700; cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    .secondary { margin-top: 12px; background: transparent; color: #356b8c; }
+    .link { margin-top: 16px; padding: 0; background: transparent; color: #356b8c; font-size: 13px; }
+    .message { min-height: 20px; margin-top: 16px; padding: 10px; border-radius: 10px; font-size: 13px; }
+    .message.hidden { visibility: hidden; }
+    .message.error { background: #fff0f0; color: #a63d3d; }
+    .message.success { background: #effaf4; color: #25734c; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>PracticumFlow</h1>
+    <p class="subtitle">Track your practicum hours and activities.</p>
+    <form id="authForm">
+      <div id="nameField" hidden>
+        <label for="name">Full name</label>
+        <input id="name" type="text" autocomplete="name" placeholder="Your full name">
+      </div>
+      <label for="email">Email address</label>
+      <input id="email" type="email" autocomplete="email" required placeholder="student@example.com">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required minlength="6" placeholder="At least 6 characters">
+      <button id="submitButton" type="submit">Sign in</button>
+    </form>
+    <button id="forgotButton" class="link" type="button">Forgot password?</button>
+    <button id="modeButton" class="secondary" type="button">Create a new account</button>
+    <div id="message" class="message hidden" role="status"></div>
+  </main>
+  <script type="module" src="assets/login.js"></script>
+</body>
+</html>

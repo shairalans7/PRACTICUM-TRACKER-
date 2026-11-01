@@ -31,6 +31,7 @@ const state = {
 };
 const ACTIVITY_CATEGORIES = ["Technical Skills", "Administration", "Communication", "Other"];
 window.dashboardBooted = true;
+window.dashboardReady = false;
 
 function timeZone() {
   const candidate = state.profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Manila";
@@ -111,14 +112,24 @@ function showNotice(text, type = "success") {
 }
 
 function showFirebaseSetupMessage() {
+  window.dashboardReady = true;
   $("#loading").hidden = true;
   $("#setupNotice").hidden = false;
   $("#app").hidden = true;
 }
 
 function showLoadError(error) {
+  window.dashboardReady = true;
   $("#loading").hidden = false;
   $("#loading").innerHTML = `<h2>Dashboard could not load</h2><p>${escapeHtml(error.message || "Check Firebase Authentication, Firestore, and Security Rules.")}</p><p>Confirm that Firestore is created and <code>firestore.rules</code> has been published.</p>`;
+}
+
+function withTimeout(promise, milliseconds = 15000) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error("Firebase is taking too long to respond. Check your internet connection, Firebase Authorized Domains, and Firestore rules.")), milliseconds);
+  });
+  return Promise.race([promise, timeout]).finally(() => window.clearTimeout(timeoutId));
 }
 
 async function loadProfile() {
@@ -546,13 +557,21 @@ if (!isFirebaseConfigured) {
     }
     try {
       state.user = user;
-      await loadProfile();
-      await loadData();
+      await withTimeout(loadProfile());
+      await withTimeout(loadData());
       $("#loading").hidden = true;
       $("#app").hidden = false;
+      window.dashboardReady = true;
       renderDashboard();
     } catch (error) {
       showLoadError(error);
     }
   });
 }
+
+window.setTimeout(() => {
+  const loading = $("#loading");
+  if (loading && !loading.hidden && !window.dashboardReady) {
+    showLoadError(new Error("Firebase did not finish loading. Verify the Firebase Authorized Domain and reload with Ctrl + F5."));
+  }
+}, 16000);

@@ -562,7 +562,17 @@ setInterval(() => { if (state.user) renderDashboard(); }, 1000);
 if (!isFirebaseConfigured) {
   showFirebaseSetupMessage();
 } else {
-  onAuthStateChanged(auth, async user => {
+  let authHandled = false;
+  const authTimeout = window.setTimeout(() => {
+    if (!authHandled) {
+      showLoadError(new Error("Firebase Authentication did not return a session. Open the sign-in page and try again."));
+    }
+  }, 8000);
+
+  const handleAuthState = async user => {
+    if (authHandled) return;
+    authHandled = true;
+    window.clearTimeout(authTimeout);
     if (!user) {
       window.location.href = "login.html";
       return;
@@ -579,7 +589,13 @@ if (!isFirebaseConfigured) {
     } catch (error) {
       showNotice(error.message || "Your dashboard data could not be loaded. Check Firestore rules and try again.", "error");
     }
-  });
+  };
+
+  try {
+    onAuthStateChanged(auth, handleAuthState, error => showLoadError(error));
+  } catch (error) {
+    showLoadError(error);
+  }
 }
 
 window.setTimeout(() => {

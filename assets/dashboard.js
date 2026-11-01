@@ -565,9 +565,13 @@ if (!isFirebaseConfigured) {
   let authHandled = false;
   const authTimeout = window.setTimeout(() => {
     if (!authHandled) {
-      showLoadError(new Error("Firebase Authentication did not return a session. Open the sign-in page and try again."));
+      if (auth.currentUser) {
+        handleAuthState(auth.currentUser);
+      } else {
+        window.location.replace("login.html");
+      }
     }
-  }, 8000);
+  }, 5000);
 
   const handleAuthState = async user => {
     if (authHandled) return;

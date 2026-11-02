@@ -120,7 +120,7 @@ listen(resendButton, "click", async () => {
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
     if (result.user.emailVerified) {
-      window.location.href = "index.html?v=7ce89ce";
+      window.location.href = "index.html?v=competencies-layout-2";
       return;
     }
     await sendEmailVerification(result.user);
@@ -178,7 +178,7 @@ listen(form, "submit", async event => {
       }
     }
 
-    if (user) window.location.href = "index.html?v=7ce89ce";
+    if (user) window.location.href = "index.html?v=competencies-layout-2";
   } catch (error) {
     if (user && !user.emailVerified) {
       await signOut(auth).catch(() => {});
@@ -193,7 +193,7 @@ if (isFirebaseConfigured) {
   onAuthStateChanged(auth, user => {
     if (user && !authActionInProgress) {
       if (user.emailVerified) {
-        window.location.href = "index.html?v=7ce89ce";
+        window.location.href = "index.html?v=competencies-layout-2";
       } else {
         signOut(auth).then(() => showVerificationMessage("Please verify your email before signing in.")).catch(() => {});
       }

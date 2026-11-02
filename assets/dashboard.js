@@ -26,10 +26,17 @@ const state = {
   activities: [],
   activeShift: null,
   editingActivityId: null,
+  profileFormDirty: false,
   activityFilters: { search: "", category: "", date: "" },
   reportRange: { start: "", end: "" }
 };
 const ACTIVITY_CATEGORIES = ["Technical Skills", "Administration", "Communication", "Other"];
+const CATEGORY_COLORS = {
+  "Technical Skills": "#2f65d5",
+  "Administration": "#1fb1c8",
+  "Communication": "#f5b61b",
+  "Other": "#c8d1df"
+};
 window.dashboardBooted = true;
 window.dashboardReady = false;
 
@@ -152,6 +159,9 @@ async function loadProfile() {
   if (!profileSnapshot.exists()) {
     state.profile = {
       fullName: state.user.displayName || state.user.email?.split("@")[0] || "Student Intern",
+      course: "",
+      major: "",
+      companyName: "",
       targetHours: 243,
       dailyMinutes: 480,
       timezone: "Asia/Manila"
@@ -162,6 +172,9 @@ async function loadProfile() {
     state.profile = {
       ...savedProfile,
       fullName: savedProfile.fullName || state.user.displayName || state.user.email?.split("@")[0] || "Student Intern",
+      course: savedProfile.course || "",
+      major: savedProfile.major || "",
+      companyName: savedProfile.companyName || "",
       targetHours: Number(savedProfile.targetHours || 243),
       dailyMinutes: Number(savedProfile.dailyMinutes || 480),
       timezone: savedProfile.timezone || "Asia/Manila"
@@ -190,6 +203,17 @@ function liveSeconds() {
   return state.activeShift?.start ? Math.max(0, Date.now() - timestampMillis(state.activeShift.start)) / 1000 : 0;
 }
 
+function syncProfileForm() {
+  if (state.profileFormDirty || $("#profileSettingsForm")?.contains(document.activeElement)) return;
+  $("#profileName").value = state.profile?.fullName || "";
+  $("#profileCourse").value = state.profile?.course || "";
+  $("#profileMajor").value = state.profile?.major || "";
+  $("#profileCompany").value = state.profile?.companyName || "";
+  $("#profileHours").value = state.profile?.targetHours || 243;
+  $("#profileDailyMinutes").value = state.profile?.dailyMinutes || 480;
+  $("#profileTimezone").value = state.profile?.timezone || "Asia/Manila";
+}
+
 function renderDashboard() {
   const targetHours = Number(state.profile?.targetHours || 243);
   const totalSeconds = completedSeconds() + liveSeconds();
@@ -199,10 +223,7 @@ function renderDashboard() {
 
   $("#userName").textContent = fullName;
   $("#userEmail").textContent = state.user.email || "";
-  $("#profileName").value = state.profile?.fullName || "";
-  $("#profileHours").value = state.profile?.targetHours || 243;
-  $("#profileDailyMinutes").value = state.profile?.dailyMinutes || 480;
-  $("#profileTimezone").value = state.profile?.timezone || "Asia/Manila";
+  syncProfileForm();
   $("#todayLabel").textContent = formatDateInTimeZone();
   $("#timerStatus").textContent = state.activeShift ? "Your shift is in progress" : "Ready when you are";
   $("#timerDisplay").textContent = formatClock(liveSeconds());
@@ -219,16 +240,6 @@ function renderDashboard() {
   const weekSeconds = state.shifts.filter(shift => shift.start && dateKeyFromParts(new Date(timestampMillis(shift.start))) >= weekStart && dateKeyFromParts(new Date(timestampMillis(shift.start))) <= today).reduce((total, shift) => total + Number(shift.durationSeconds || 0), 0) + (state.activeShift ? liveSeconds() : 0);
   $("#todayHours").textContent = formatHours(todaySeconds);
   $("#weekHours").textContent = formatHours(weekSeconds);
-
-  const categoryTotals = {};
-  state.activities.forEach(activity => {
-    categoryTotals[activity.category] = (categoryTotals[activity.category] || 0) + Number(activity.minutes || 0);
-  });
-  $("#competencyList").innerHTML = ACTIVITY_CATEGORIES.map(category => {
-    const minutes = categoryTotals[category] || 0;
-    const totalMinutes = Object.values(categoryTotals).reduce((sum, value) => sum + value, 0) || 1;
-    return `<div class="competency-row"><span>${escapeHtml(category)}</span><strong>${Math.round(minutes / totalMinutes * 100)}%</strong></div>`;
-  }).join("");
 
   $("#activityList").innerHTML = state.activities.length ? state.activities.slice(0, 8).map(activity => `
     <article class="activity-row">
@@ -278,6 +289,55 @@ function filteredActivities() {
   });
 }
 
+function minutesBetweenTimes(startTime, endTime) {
+  if (!startTime || !endTime) return 0;
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+  const minutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+  return minutes > 0 ? minutes : 0;
+}
+
+function updateActivityDuration() {
+  const minutes = minutesBetweenTimes($("#activityStartTime").value, $("#activityEndTime").value);
+  $("#duration").value = minutes ? (minutes / 60).toFixed(2) : "";
+}
+
+function renderCompetencyChart(totals, pieSelector = "#competencyPie", legendSelector = "#competencyLegend") {
+  const pie = $(pieSelector);
+  const legend = $(legendSelector);
+  if (!pie || !legend) return;
+  const totalMinutes = totals.reduce((sum, item) => sum + item.minutes, 0);
+  if (!totalMinutes) {
+    pie.className = "competency-pie empty";
+    pie.style.background = "";
+    pie.innerHTML = "<strong>0</strong><span>TASKS</span>";
+    pie.setAttribute("aria-label", "No competency data yet");
+    legend.innerHTML = totals.map(item => `<div class="legend-item"><span class="legend-name"><span class="legend-dot" style="color:${CATEGORY_COLORS[item.category]};background:${CATEGORY_COLORS[item.category]}" aria-hidden="true"></span><span>${escapeHtml(item.category)}</span></span><strong>0%</strong></div>`).join("");
+    return;
+  }
+  let currentDegree = 0;
+  const stops = totals.filter(item => item.minutes > 0).map(item => {
+    const startDegree = currentDegree;
+    currentDegree += item.minutes / totalMinutes * 360;
+    return `${CATEGORY_COLORS[item.category]} ${startDegree}deg ${currentDegree}deg`;
+  }).join(", ");
+  pie.className = "competency-pie";
+  pie.style.background = `conic-gradient(${stops})`;
+  const totalTasks = totals.reduce((sum, item) => sum + item.count, 0);
+  pie.innerHTML = `<strong>${totalTasks}</strong><span>TASKS</span>`;
+  pie.setAttribute("aria-label", `Competency distribution: ${totals.filter(item => item.minutes > 0).map(item => `${item.category} ${Math.round(item.minutes / totalMinutes * 100)} percent`).join(", ")}`);
+  legend.innerHTML = totals.map(item => `<div class="legend-item"><span class="legend-name"><span class="legend-dot" style="color:${CATEGORY_COLORS[item.category]};background:${CATEGORY_COLORS[item.category]}" aria-hidden="true"></span><span>${escapeHtml(item.category)}</span></span><strong>${Math.round(item.minutes / totalMinutes * 100)}%</strong></div>`).join("");
+}
+
+function setTaskType(category) {
+  if (!ACTIVITY_CATEGORIES.includes(category)) category = "Technical Skills";
+  $("#taskType").value = category;
+  document.querySelectorAll("[data-task-type]").forEach(button => {
+    const selected = button.dataset.taskType === category;
+    button.setAttribute("aria-checked", String(selected));
+  });
+}
+
 function inReportRange(date) {
   return (!state.reportRange.start || date >= state.reportRange.start)
     && (!state.reportRange.end || date <= state.reportRange.end);
@@ -302,20 +362,16 @@ function renderSecondaryViews() {
 
   const visibleActivities = filteredActivities();
   $("#activityLogsList").innerHTML = visibleActivities.length ? visibleActivities.map(activity => `
-    <tr><td>${escapeHtml(formatActivityDate(activity.date))}</td><td><strong>${escapeHtml(activity.title)}</strong></td><td><span class="tag">${escapeHtml(activity.category)}</span></td><td>${(Number(activity.minutes || 0) / 60).toFixed(2)}h</td><td>${escapeHtml(activity.notes || "—")}</td><td><button class="table-action" data-edit-activity="${escapeHtml(activity.id)}" type="button">Edit</button> <button class="table-action danger" data-delete-activity="${escapeHtml(activity.id)}" type="button">Delete</button></td></tr>
-  `).join("") : `<tr><td colspan="6" class="empty">No activities match the selected filters.</td></tr>`;
+    <tr><td>${escapeHtml(formatActivityDate(activity.date))}</td><td>${escapeHtml(activity.startTime || "-")} - ${escapeHtml(activity.endTime || "-")}</td><td><strong>${escapeHtml(activity.title)}</strong></td><td><span class="tag">${escapeHtml(activity.category)}</span></td><td>${(Number(activity.minutes || 0) / 60).toFixed(2)}h</td><td>${escapeHtml(activity.notes || "-")}</td><td><button class="table-action" data-edit-activity="${escapeHtml(activity.id)}" type="button">Edit</button> <button class="table-action danger" data-delete-activity="${escapeHtml(activity.id)}" type="button">Delete</button></td></tr>
+  `).join("") : `<tr><td colspan="7" class="empty">No activities match the selected filters.</td></tr>`;
 
   const allTotals = ACTIVITY_CATEGORIES.map(category => ({
     category,
     count: state.activities.filter(activity => activity.category === category).length,
     minutes: state.activities.filter(activity => activity.category === category).reduce((total, activity) => total + Number(activity.minutes || 0), 0)
   }));
-  const totalMinutes = allTotals.reduce((total, item) => total + item.minutes, 0) || 1;
-  $("#competencySummary").innerHTML = allTotals.map(item => `<div class="card"><h3>${escapeHtml(item.category)}</h3><strong>${(item.minutes / 60).toFixed(1)}h</strong><p class="muted">${item.count} activit${item.count === 1 ? "y" : "ies"}</p></div>`).join("");
-  $("#competencyDetails").innerHTML = allTotals.map(item => `
-    <div class="competency-row"><span>${escapeHtml(item.category)}</span><strong>${Math.round(item.minutes / totalMinutes * 100)}%</strong></div>
-    <div class="progress-track" style="margin-bottom:14px"><div class="progress-bar" style="width:${Math.round(item.minutes / totalMinutes * 100)}%"></div></div>
-  `).join("");
+  renderCompetencyChart(allTotals);
+  renderCompetencyChart(allTotals, "#dashboardCompetencyPie", "#dashboardCompetencyLegend");
 
   const report = getReportData();
   const activityMinutes = report.activityMinutes;
@@ -384,6 +440,15 @@ function setView(viewName) {
   renderSecondaryViews();
 }
 
+function closeMobileNavigation() {
+  const navigation = $("#mainNav");
+  const toggle = $("#navToggle");
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    navigation.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+  }
+}
+
 async function toggleClock() {
   $("#clockButton").disabled = true;
   try {
@@ -393,6 +458,11 @@ async function toggleClock() {
       await updateDoc(doc(db, "shifts", state.activeShift.id), { end, durationSeconds });
       showNotice("Shift saved. Every hour counts.");
     } else {
+      const alreadyClockedToday = state.shifts.some(shift => shift.start && dateKeyFromParts(new Date(timestampMillis(shift.start))) === todayISO());
+      if (alreadyClockedToday) {
+        showNotice("Only one time log is allowed per day. Clock out the existing shift before trying again.", "error");
+        return;
+      }
       await addDoc(collection(db, "shifts"), { userId: state.user.uid, start: Timestamp.now(), end: null, durationSeconds: 0, createdAt: serverTimestamp() });
       showNotice("You are clocked in. Have a productive day!");
     }
@@ -410,6 +480,7 @@ function openModal() {
   $("#activityModalTitle").textContent = "Add activity";
   $("#saveActivity").textContent = "Save activity";
   $("#activityForm").reset();
+  setTaskType("Technical Skills");
   $("#activityModal").showModal();
   $("#activityDate").value = todayISO();
 }
@@ -426,46 +497,42 @@ function openEditActivity(activityId) {
   $("#activityModalTitle").textContent = "Edit activity";
   $("#saveActivity").textContent = "Update activity";
   $("#taskTitle").value = activity.title || "";
-  $("#taskType").value = activity.category || "Other";
-  $("#duration").value = (Number(activity.minutes || 0) / 60).toFixed(2);
+  setTaskType(activity.category || "Other");
   $("#activityDate").value = activity.date || todayISO();
+  $("#activityStartTime").value = activity.startTime || "";
+  $("#activityEndTime").value = activity.endTime || "";
+  $("#duration").value = activity.startTime && activity.endTime
+    ? (minutesBetweenTimes(activity.startTime, activity.endTime) / 60).toFixed(2)
+    : (Number(activity.minutes || 0) / 60).toFixed(2);
   $("#notes").value = activity.notes || "";
   $("#activityModal").showModal();
 }
 
-function openSettings() {
-  $("#settingsName").value = state.profile?.fullName || "";
-  $("#settingsHours").value = state.profile?.targetHours || 243;
-  $("#settingsDailyMinutes").value = state.profile?.dailyMinutes || 480;
-  $("#settingsTimezone").value = state.profile?.timezone || "Asia/Manila";
-  $("#settingsModal").showModal();
-}
-
-function closeSettings() {
-  $("#settingsModal").close();
-}
-
 async function saveProfileValues({ prefix, buttonSelector, closeSelector = null }) {
   const fullName = $(`#${prefix}Name`).value.trim();
+  const course = $(`#${prefix}Course`)?.value.trim() || "";
+  const major = $(`#${prefix}Major`)?.value.trim() || "";
+  const companyName = $(`#${prefix}Company`)?.value.trim() || "";
   const targetHours = Number($(`#${prefix}Hours`).value);
   const dailyMinutes = Number($(`#${prefix}DailyMinutes`).value);
   const timezone = $(`#${prefix}Timezone`).value;
 
-  if (!fullName || fullName.length > 120 || !Number.isFinite(targetHours) || targetHours <= 0 || targetHours > 1000 || !Number.isInteger(dailyMinutes) || dailyMinutes < 1 || dailyMinutes > 1440 || !timezone) {
-    showNotice("Check your name, target hours, daily minutes, and timezone.", "error");
+  if (!fullName || fullName.length > 120 || course.length > 120 || major.length > 120 || companyName.length > 160 || !Number.isFinite(targetHours) || targetHours <= 0 || targetHours > 1000 || !Number.isInteger(dailyMinutes) || dailyMinutes < 1 || dailyMinutes > 1440 || !timezone) {
+    showNotice("Check your name, course, major, company, target hours, daily minutes, and timezone.", "error");
     return;
   }
 
   const button = $(buttonSelector);
   button.disabled = true;
   try {
-    const profile = { fullName, targetHours, dailyMinutes, timezone };
+    const profile = { fullName, course, major, companyName, targetHours, dailyMinutes, timezone };
     await setDoc(doc(db, "profiles", state.user.uid), {
       ...profile,
       email: state.user.email,
       updatedAt: serverTimestamp()
     }, { merge: true });
     state.profile = { ...state.profile, ...profile };
+    state.profileFormDirty = false;
     if (closeSelector) $(closeSelector).close();
     renderDashboard();
     showNotice("Settings saved.");
@@ -474,11 +541,6 @@ async function saveProfileValues({ prefix, buttonSelector, closeSelector = null 
   } finally {
     button.disabled = false;
   }
-}
-
-function saveSettings(event) {
-  event.preventDefault();
-  return saveProfileValues({ prefix: "settings", buttonSelector: "#saveSettings", closeSelector: "#settingsModal" });
 }
 
 function saveProfileSettings(event) {
@@ -491,18 +553,20 @@ async function saveActivity(event) {
   const form = event.currentTarget;
   const title = $("#taskTitle").value.trim();
   const category = $("#taskType").value;
-  const minutes = Math.round(Number($("#duration").value) * 60);
   const date = $("#activityDate").value;
+  const startTime = $("#activityStartTime").value;
+  const endTime = $("#activityEndTime").value;
+  const minutes = minutesBetweenTimes(startTime, endTime);
   const notes = $("#notes").value.trim();
-  if (!title || !date || !ACTIVITY_CATEGORIES.includes(category) || !Number.isInteger(minutes) || minutes < 15 || minutes > 1440) {
-    showNotice("Enter a title, choose a valid category, and use a duration from 0.25 to 24 hours.", "error");
+  if (!title || !date || !startTime || !endTime || !ACTIVITY_CATEGORIES.includes(category) || !Number.isInteger(minutes) || minutes < 15 || minutes > 1440) {
+    showNotice("Enter a title, task type, date, start time, and end time. End time must be after start time and the task must be at least 15 minutes.", "error");
     return;
   }
 
   $("#saveActivity").disabled = true;
   try {
     const wasEditing = Boolean(state.editingActivityId);
-    const activityData = { title, category, minutes, date, notes };
+    const activityData = { title, category, minutes, date, startTime, endTime, notes };
     if (wasEditing) {
       await updateDoc(doc(db, "activities", state.editingActivityId), activityData);
     } else {
@@ -525,11 +589,18 @@ $("#openActivity").addEventListener("click", openModal);
 $("#openActivityBottom").addEventListener("click", openModal);
 $("#closeActivity").addEventListener("click", closeModal);
 $("#activityForm").addEventListener("submit", saveActivity);
-$("#openSettings").addEventListener("click", openSettings);
-$("#closeSettings").addEventListener("click", closeSettings);
-$("#settingsForm").addEventListener("submit", saveSettings);
+$("#activityStartTime").addEventListener("change", updateActivityDuration);
+$("#activityEndTime").addEventListener("change", updateActivityDuration);
+document.querySelectorAll("[data-task-type]").forEach(button => button.addEventListener("click", () => setTaskType(button.dataset.taskType)));
 $("#profileSettingsForm").addEventListener("submit", saveProfileSettings);
+$("#profileSettingsForm").addEventListener("input", () => { state.profileFormDirty = true; });
 document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
+$("#navToggle").addEventListener("click", () => {
+  const navigation = $("#mainNav");
+  const expanded = navigation.classList.toggle("open");
+  $("#navToggle").setAttribute("aria-expanded", String(expanded));
+});
+document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", closeMobileNavigation));
 $("#timeLogsClock").addEventListener("click", toggleClock);
 $("#openActivityLogs").addEventListener("click", openModal);
 $("#activityLogsList").addEventListener("click", event => {
@@ -561,13 +632,13 @@ $("#exportReport").addEventListener("click", exportReport);
 $("#signOut").addEventListener("click", async event => {
   const button = event.currentTarget;
   button.disabled = true;
-  button.textContent = "Signing out…";
+  button.querySelector(".signout-label").textContent = "Signing out…";
   try {
     await signOut(auth);
     window.location.replace("login.html");
   } catch (error) {
     button.disabled = false;
-    button.textContent = "Sign out";
+    button.querySelector(".signout-label").textContent = "Sign out";
     showNotice(error.message || "Could not sign out. Please try again.", "error");
   }
 });

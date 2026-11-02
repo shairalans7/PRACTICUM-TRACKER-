@@ -2,3 +2,4 @@ _references/
 *.php
 README_UPDATED.txt
 schema_update.sql
+functions/node_modules/

@@ -47,12 +47,15 @@ The browser Firebase configuration is not a password. Security comes from Fireba
 
 - Dashboard, Time Logs, Activity Logs, Competencies, Reports, and Settings/Profile sections.
 - Activity search, category/date filters, edit, and delete actions.
+- Structured activity entries with date, task type, start time, end time, task description, and automatic duration calculation.
+- Live competency category totals with a pie chart and legend.
+- One clock-in per day guard in the client UI.
 - Report date range, category totals, CSV download, and print/PDF-friendly layout.
 - Profile values for full name, target hours, daily minutes, and timezone.
 
 ## Next implementation steps
 
-1. Publish the latest `firestore.rules` in Firebase Console and test every write action.
+1. Publish the latest `firestore.rules` and test every write action.
 2. Add Firebase Emulator Suite tests before production deployment.
 3. Keep all Admin SDK credentials out of source control.
 

@@ -149,6 +149,9 @@ form.addEventListener("submit", async event => {
       await setDoc(doc(db, "profiles", user.uid), {
         fullName,
         email,
+        course: "",
+        major: "",
+        companyName: "",
         targetHours: 243,
         dailyMinutes: 480,
         timezone: "Asia/Manila",

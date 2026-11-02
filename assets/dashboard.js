@@ -42,6 +42,12 @@ const CATEGORY_COLORS = {
   "Communication": "#f5b61b",
   "Other": "#c8d1df"
 };
+const COMPETENCY_DETAILS = {
+  "Technical Skills": { icon: "◔", className: "technical", description: "Hands-on problem solving, troubleshooting, and applying technical knowledge." },
+  "Administration": { icon: "◷", className: "admin", description: "Organizing documents, managing records, and supporting daily operations." },
+  "Communication": { icon: "◔", className: "communication", description: "Sharing ideas, collaborating with colleagues, and communicating with clients." },
+  "Other": { icon: "◷", className: "other", description: "Other practical experiences and learning activities during your internship." }
+};
 window.dashboardBooted = true;
 window.dashboardReady = false;
 
@@ -334,6 +340,16 @@ function renderCompetencyChart(totals, pieSelector = "#competencyPie", legendSel
   legend.innerHTML = totals.map(item => `<div class="legend-item"><span class="legend-name"><span class="legend-dot" style="color:${CATEGORY_COLORS[item.category]};background:${CATEGORY_COLORS[item.category]}" aria-hidden="true"></span><span>${escapeHtml(item.category)}</span></span><strong>${Math.round(item.minutes / totalMinutes * 100)}%</strong></div>`).join("");
 }
 
+function renderCompetencySkills(totals) {
+  const container = $("#competencySkills");
+  if (!container) return;
+  container.innerHTML = totals.map(item => {
+    const detail = COMPETENCY_DETAILS[item.category];
+    const hours = (item.minutes / 60).toFixed(2);
+    return `<article class="competency-skill-row"><span class="skill-icon ${detail.className}" aria-hidden="true">${detail.icon}</span><div><h3>${escapeHtml(item.category)}</h3><p>${escapeHtml(detail.description)}</p><span class="skill-meta">${item.count} activit${item.count === 1 ? "y" : "ies"} · ${hours}h</span></div></article>`;
+  }).join("");
+}
+
 function setTaskType(category) {
   if (!ACTIVITY_CATEGORIES.includes(category)) category = "Technical Skills";
   $("#taskType").value = category;
@@ -377,6 +393,7 @@ function renderSecondaryViews() {
   }));
   renderCompetencyChart(allTotals);
   renderCompetencyChart(allTotals, "#dashboardCompetencyPie", "#dashboardCompetencyLegend");
+  renderCompetencySkills(allTotals);
 
   const report = getReportData();
   const activityMinutes = report.activityMinutes;
@@ -592,6 +609,7 @@ async function saveActivity(event) {
 listen("#clockButton", "click", toggleClock);
 listen("#openActivity", "click", openModal);
 listen("#openActivityBottom", "click", openModal);
+listen("#openCompetencyActivity", "click", openModal);
 listen("#closeActivity", "click", closeModal);
 listen("#activityForm", "submit", saveActivity);
 listen("#activityStartTime", "change", updateActivityDuration);

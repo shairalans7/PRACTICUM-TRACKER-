@@ -132,8 +132,10 @@ function showFirebaseSetupMessage() {
 
 function showLoadError(error) {
   window.dashboardReady = true;
-  $("#loading").hidden = false;
-  $("#loading").innerHTML = `<h2>Dashboard could not load</h2><p>${escapeHtml(error.message || "Check Firebase Authentication, Firestore, and Security Rules.")}</p><p>Confirm that Firestore is created and <code>firestore.rules</code> has been published.</p>`;
+  const notice = $("#notice");
+  notice.textContent = error.message || "The dashboard could not load. Check Firebase Authentication, Firestore, and Security Rules.";
+  notice.className = "notice error";
+  notice.hidden = false;
 }
 
 function withTimeout(promise, milliseconds = 15000) {
@@ -556,7 +558,19 @@ $("#clearReportRange").addEventListener("click", () => {
 });
 $("#printReport").addEventListener("click", printReport);
 $("#exportReport").addEventListener("click", exportReport);
-$("#signOut").addEventListener("click", () => signOut(auth));
+$("#signOut").addEventListener("click", async event => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  button.textContent = "Signing out…";
+  try {
+    await signOut(auth);
+    window.location.replace("login.html");
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Sign out";
+    showNotice(error.message || "Could not sign out. Please try again.", "error");
+  }
+});
 setInterval(() => { if (state.user) renderDashboard(); }, 1000);
 
 if (!isFirebaseConfigured) {

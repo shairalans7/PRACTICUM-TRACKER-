@@ -5,6 +5,7 @@ import {
   doc,
   isFirebaseConfigured,
   onAuthStateChanged,
+  sendEmailVerification,
   sendPasswordResetEmail,
   setDoc,
   serverTimestamp,
@@ -22,12 +23,30 @@ const emailInput = document.querySelector("#email");
 const passwordInput = document.querySelector("#password");
 const message = document.querySelector("#message");
 const forgotButton = document.querySelector("#forgotButton");
+const resendButton = document.querySelector("#resendButton");
+const authStatus = document.querySelector("#authStatus");
+const authStatusText = document.querySelector("#authStatusText");
 let registerMode = false;
 let authActionInProgress = false;
 
 function showMessage(text, type = "error") {
   message.textContent = text;
   message.className = `message ${type}`;
+}
+
+function setBusy(busy, text = "Working securely") {
+  authActionInProgress = busy;
+  authStatus.hidden = !busy;
+  authStatusText.textContent = text;
+  submitButton.disabled = busy;
+  modeButton.disabled = busy;
+  forgotButton.disabled = busy;
+  resendButton.disabled = busy;
+}
+
+function showVerificationMessage(text) {
+  showMessage(text, "success");
+  resendButton.hidden = false;
 }
 
 function friendlyError(error) {
@@ -38,12 +57,14 @@ function friendlyError(error) {
     "auth/invalid-email": "Enter a valid email address.",
     "auth/configuration-not-found": "Firebase Authentication is not enabled for this project. Enable Email/Password in Firebase Console > Authentication > Sign-in method.",
     "auth/operation-not-allowed": "Enable Email/Password in Firebase Console > Authentication > Sign-in method.",
-    "auth/unauthorized-domain": "Add localhost and 127.0.0.1 under Firebase Console > Authentication > Settings > Authorized domains."
+    "auth/unauthorized-domain": "Add this website under Firebase Console > Authentication > Settings > Authorized domains.",
+    "auth/too-many-requests": "Too many attempts. Wait a moment, then try again.",
+    "auth/network-request-failed": "Network error. Check your connection and try again."
   };
   if (error?.code?.startsWith("permission-denied")) {
     return "Your account was created, but the profile could not be saved. Publish the current Firestore rules, then try signing in again.";
   }
-  return messages[error.code] || "Authentication failed. Please try again.";
+  return messages[error?.code] || "Authentication failed. Please try again.";
 }
 
 function setMode() {
@@ -74,26 +95,51 @@ forgotButton.addEventListener("click", async () => {
     showMessage("Enter your email first, then select Forgot password.");
     return;
   }
+  setBusy(true, "Sending password reset email");
   try {
     await sendPasswordResetEmail(auth, email);
     showMessage("Password reset email sent.", "success");
   } catch (error) {
     showMessage(friendlyError(error));
+  } finally {
+    setBusy(false);
+  }
+});
+
+resendButton.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  if (!email || !password) {
+    showMessage("Enter your email and password first, then resend the verification email.");
+    return;
+  }
+  setBusy(true, "Resending verification email");
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    if (result.user.emailVerified) {
+      window.location.href = "index.html";
+      return;
+    }
+    await sendEmailVerification(result.user);
+    await signOut(auth);
+    showVerificationMessage("A new verification email was sent. Verify your email before signing in.");
+  } catch (error) {
+    showMessage(friendlyError(error));
+  } finally {
+    setBusy(false);
   }
 });
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
-  submitButton.disabled = true;
-  modeButton.disabled = true;
-  forgotButton.disabled = true;
-  authActionInProgress = true;
+  setBusy(true, registerMode ? "Creating your account" : "Signing you in");
+  resendButton.hidden = true;
   showMessage("", "hidden");
+  let user = null;
 
   try {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
-    let user;
 
     if (registerMode) {
       const result = await createUserWithEmailAndPassword(auth, email, password);
@@ -108,28 +154,44 @@ form.addEventListener("submit", async event => {
         timezone: "Asia/Manila",
         updatedAt: serverTimestamp()
       }, { merge: true });
+      await sendEmailVerification(user);
+      await signOut(auth);
+      registerMode = false;
+      setMode();
+      passwordInput.value = "";
+      showVerificationMessage("Account created. Check your email and verify your address before signing in.");
+      return;
     } else {
       const result = await signInWithEmailAndPassword(auth, email, password);
       user = result.user;
+      if (!user.emailVerified) {
+        await sendEmailVerification(user);
+        await signOut(auth);
+        showVerificationMessage("Please verify your email first. We sent you a new verification email.");
+        return;
+      }
     }
 
     if (user) window.location.href = "index.html";
   } catch (error) {
-    if (registerMode && auth.currentUser) {
+    if (user && !user.emailVerified) {
       await signOut(auth).catch(() => {});
     }
     showMessage(friendlyError(error));
   } finally {
-    authActionInProgress = false;
-    submitButton.disabled = false;
-    modeButton.disabled = false;
-    forgotButton.disabled = false;
+    setBusy(false);
   }
 });
 
 if (isFirebaseConfigured) {
   onAuthStateChanged(auth, user => {
-    if (user && !authActionInProgress) window.location.href = "index.html";
+    if (user && !authActionInProgress) {
+      if (user.emailVerified) {
+        window.location.href = "index.html";
+      } else {
+        signOut(auth).then(() => showVerificationMessage("Please verify your email before signing in.")).catch(() => {});
+      }
+    }
   });
 }
 

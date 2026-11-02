@@ -34,7 +34,7 @@
     .button.light { background: #e9f5ee; color: #245c43; }
     .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0; }
-    .card { padding: 22px; border: 1px solid #e5edf2; border-radius: 18px; background: #fff; box-shadow: 0 8px 24px #17324d08; }
+    .card { padding: 22px; border: 1px solid #e5edf2; border-radius: 18px; background: #fff; color: var(--text); box-shadow: 0 8px 24px #17324d08; }
     .timer { min-height: 180px; display: flex; justify-content: space-between; align-items: center; padding: 26px; border-radius: 20px; background: #19344f; color: #fff; }
     .timer-status { color: #bce7d2; font-size: 13px; }
     .timer-display { margin: 13px 0; font-size: 50px; font-weight: 800; font-family: Consolas, monospace; }
@@ -71,49 +71,61 @@
 
     :root {
       color-scheme: light;
-      --page: #eef5f8;
-      --text: #21354c;
-      --muted: #718194;
+      --page: #e7eef3;
+      --text: #20283f;
+      --muted: #65738b;
       --border: #ffffff9c;
-      --surface: #ffffffad;
-      --surface-strong: #ffffffd9;
-      --sidebar: #19344fd9;
-      --sidebar-soft: #2a4b68b8;
-      --accent: #19344f;
-      --accent-soft: #e9f5ee;
+      --surface: #ffffff4d;
+      --surface-strong: #ffffffe0;
+      --sidebar: #263756c9;
+      --sidebar-soft: #3a4e7394;
+      --accent: #5143a0;
+      --accent-soft: #e1dcff;
       --line: #ffffff80;
-      --shadow: #17324d1c;
+      --shadow: #17233f32;
+      --timer: #253b62d9;
+      --photo-tint: #dce9ee30;
+      --glow-violet: #9d7cff55;
+      --glow-cyan: #34d8d055;
+      --background-image: url("assets/practicum-time-tracker-background-light.png");
     }
     :root[data-theme="dark"] {
       color-scheme: dark;
-      --page: #0d1724;
-      --text: #e8f1f8;
-      --muted: #a6b5c4;
-      --border: #ffffff1c;
-      --surface: #17283acc;
-      --surface-strong: #1d3047e8;
-      --sidebar: #081522dc;
-      --sidebar-soft: #1d3953cc;
-      --accent: #b8ead1;
-      --accent-soft: #214b3a;
-      --line: #ffffff16;
-      --shadow: #00000055;
+      --page: #070914;
+      --text: #f4f2ff;
+      --muted: #b6bdd5;
+      --border: #ffffff28;
+      --surface: #ffffff12;
+      --surface-strong: #15182be8;
+      --sidebar: #080b18df;
+      --sidebar-soft: #171b38b8;
+      --accent: #d09aff;
+      --accent-soft: #1b3152;
+      --line: #ffffff18;
+      --shadow: #00000080;
+      --timer: #11162bde;
+      --photo-tint: #070a1899;
+      --glow-violet: #b45cff52;
+      --glow-cyan: #1ed4ee4d;
+      --background-image: url("assets/practicum-time-tracker-background.png");
     }
-    body { color: var(--text); background: radial-gradient(circle at 10% 0%, #b9e7dc55, transparent 34%), radial-gradient(circle at 100% 20%, #b9d8f855, transparent 32%), var(--page); transition: background .25s, color .25s; }
+    body { position: relative; isolation: isolate; min-height: 100vh; color: var(--text); background: var(--page); transition: background .25s, color .25s; }
+    body::before { position: fixed; z-index: -2; inset: 0; content: ""; background: linear-gradient(var(--photo-tint), var(--photo-tint)), var(--background-image) center / cover no-repeat; filter: saturate(1.08) contrast(1.02); }
+    body::after { position: fixed; z-index: -1; inset: 0; content: ""; pointer-events: none; background: radial-gradient(circle at 16% 18%, var(--glow-violet), transparent 32%), radial-gradient(circle at 82% 20%, var(--glow-cyan), transparent 30%); mix-blend-mode: screen; opacity: .8; }
     aside { background: var(--sidebar); box-shadow: 16px 0 50px var(--shadow); backdrop-filter: blur(24px); }
     nav span { color: #d5e4ee; }
     nav span.active, nav span:hover { background: var(--surface-strong); color: var(--text); }
     .profile { background: var(--sidebar-soft); border: 1px solid var(--border); }
     .card, .setup { border-color: var(--border); background: var(--surface); box-shadow: 0 16px 45px var(--shadow); backdrop-filter: blur(22px); }
-    .timer { background: linear-gradient(135deg, #19344fe8, #2c6b72d9); box-shadow: 0 18px 42px var(--shadow); }
+    .timer { background: var(--timer); box-shadow: 0 18px 42px var(--shadow); backdrop-filter: blur(24px) saturate(145%); }
     .muted, .stat-label, .activity-row p, .card-footer { color: var(--muted); }
     .button { background: var(--accent); color: #fff; box-shadow: 0 8px 20px var(--shadow); }
     :root[data-theme="dark"] .button { color: #102031; }
     .button.light { background: var(--accent-soft); color: var(--text); }
     .progress-track { background: var(--line); }
     .activity-row, .competency-row { border-color: var(--line); }
-    .tag { background: #b9e7dc38; color: var(--text); }
-    .duration, .competency-row strong { color: #4a9b91; }
+    .tag { background: #ffffff1f; color: var(--text); border: 1px solid var(--border); }
+    .duration, .competency-row strong { color: var(--accent); }
     .notice { background: var(--accent-soft); color: var(--text); border: 1px solid var(--border); }
     .notice.error { background: #8d3c3c44; color: #ffbaba; }
     dialog { color: var(--text); background: var(--surface-strong); backdrop-filter: blur(22px); }
@@ -152,8 +164,12 @@
     }
     .nav-button { width: 100%; padding: 12px 14px; border: 0; border-radius: 10px; background: transparent; color: #c9d8e5; text-align: left; }
     .nav-button.active, .nav-button:hover { background: var(--surface-strong); color: var(--text); }
-    @media (max-width: 700px) { .data-table { min-width: 680px; } .table-scroll { overflow-x: auto; } .summary-grid { grid-template-columns: 1fr; } .view-toolbar { align-items: flex-start; flex-direction: column; } }
+    h1, h2, h3, .stat-value, .progress-number, .activity-row strong, .competency-row, .data-table td { color: var(--text); }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #75bca0; outline-offset: 2px; }
+    @media (max-width: 700px) { .data-table { min-width: 680px; } .table-scroll { overflow-x: auto; } .summary-grid { grid-template-columns: 1fr; } .view-toolbar { align-items: flex-start; flex-direction: column; } .filter-bar { grid-template-columns: 1fr; } .report-actions { width: 100%; flex-wrap: wrap; } }
     @media (max-width: 540px) { .topbar-actions { margin-top: 15px; } .topbar-actions .button { margin-top: 0; } }
+    @media (max-width: 900px) { aside { padding: 18px; } nav { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; } .profile strong, .profile small { grid-column: 1 / -1; } .profile button { margin-top: 0; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
   </style>
 </head>
 <body>
@@ -231,11 +247,15 @@
     setTimeout(() => {
       const loading = document.querySelector("#loading");
       if (loading && !window.dashboardBooted) {
-        loading.hidden = false;
-        loading.innerHTML = "<h2>Dashboard script did not load</h2><p>Check your internet connection and reload the page.</p>";
+        const notice = document.querySelector("#notice");
+        notice.hidden = false;
+        notice.className = "notice error";
+        notice.textContent = "The dashboard script did not load. Check your connection and reload the page.";
       } else if (loading && !window.dashboardReady) {
-        loading.hidden = false;
-        loading.innerHTML = "<h2>Firebase is taking too long</h2><p>Check Firebase Authorized Domains, Firestore rules, and your internet connection.</p><p>Then reload with <strong>Ctrl + F5</strong>.</p>";
+        const notice = document.querySelector("#notice");
+        notice.hidden = false;
+        notice.className = "notice error";
+        notice.textContent = "Firebase is taking too long to respond. Check your connection and reload the page.";
       }
     }, 10000);
   </script>

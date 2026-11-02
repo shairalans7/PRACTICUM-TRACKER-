@@ -26,6 +26,9 @@ const forgotButton = document.querySelector("#forgotButton");
 const resendButton = document.querySelector("#resendButton");
 const authStatus = document.querySelector("#authStatus");
 const authStatusText = document.querySelector("#authStatusText");
+const listen = (element, eventName, handler) => {
+  if (element) element.addEventListener(eventName, handler);
+};
 let registerMode = false;
 let authActionInProgress = false;
 
@@ -84,12 +87,12 @@ if (!isFirebaseConfigured) {
   forgotButton.disabled = true;
 }
 
-modeButton.addEventListener("click", () => {
+listen(modeButton, "click", () => {
   registerMode = !registerMode;
   setMode();
 });
 
-forgotButton.addEventListener("click", async () => {
+listen(forgotButton, "click", async () => {
   const email = emailInput.value.trim();
   if (!email) {
     showMessage("Enter your email first, then select Forgot password.");
@@ -106,7 +109,7 @@ forgotButton.addEventListener("click", async () => {
   }
 });
 
-resendButton.addEventListener("click", async () => {
+listen(resendButton, "click", async () => {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
   if (!email || !password) {
@@ -130,7 +133,7 @@ resendButton.addEventListener("click", async () => {
   }
 });
 
-form.addEventListener("submit", async event => {
+listen(form, "submit", async event => {
   event.preventDefault();
   setBusy(true, registerMode ? "Creating your account" : "Signing you in");
   resendButton.hidden = true;

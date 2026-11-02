@@ -19,6 +19,11 @@ import {
 } from "./firebase.js";
 
 const $ = selector => document.querySelector(selector);
+const listen = (selector, eventName, handler) => {
+  const element = typeof selector === "string" ? $(selector) : selector;
+  if (element) element.addEventListener(eventName, handler);
+  return element;
+};
 const state = {
   user: null,
   profile: null,
@@ -584,52 +589,53 @@ async function saveActivity(event) {
   }
 }
 
-$("#clockButton").addEventListener("click", toggleClock);
-$("#openActivity").addEventListener("click", openModal);
-$("#openActivityBottom").addEventListener("click", openModal);
-$("#closeActivity").addEventListener("click", closeModal);
-$("#activityForm").addEventListener("submit", saveActivity);
-$("#activityStartTime").addEventListener("change", updateActivityDuration);
-$("#activityEndTime").addEventListener("change", updateActivityDuration);
-document.querySelectorAll("[data-task-type]").forEach(button => button.addEventListener("click", () => setTaskType(button.dataset.taskType)));
-$("#profileSettingsForm").addEventListener("submit", saveProfileSettings);
-$("#profileSettingsForm").addEventListener("input", () => { state.profileFormDirty = true; });
-document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setView(button.dataset.view)));
-$("#navToggle").addEventListener("click", () => {
+listen("#clockButton", "click", toggleClock);
+listen("#openActivity", "click", openModal);
+listen("#openActivityBottom", "click", openModal);
+listen("#closeActivity", "click", closeModal);
+listen("#activityForm", "submit", saveActivity);
+listen("#activityStartTime", "change", updateActivityDuration);
+listen("#activityEndTime", "change", updateActivityDuration);
+document.querySelectorAll("[data-task-type]").forEach(button => listen(button, "click", () => setTaskType(button.dataset.taskType)));
+listen("#profileSettingsForm", "submit", saveProfileSettings);
+listen("#profileSettingsForm", "input", () => { state.profileFormDirty = true; });
+document.querySelectorAll("[data-view]").forEach(button => listen(button, "click", () => setView(button.dataset.view)));
+listen("#navToggle", "click", () => {
   const navigation = $("#mainNav");
+  if (!navigation) return;
   const expanded = navigation.classList.toggle("open");
   $("#navToggle").setAttribute("aria-expanded", String(expanded));
 });
-document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", closeMobileNavigation));
-$("#timeLogsClock").addEventListener("click", toggleClock);
-$("#openActivityLogs").addEventListener("click", openModal);
-$("#activityLogsList").addEventListener("click", event => {
+document.querySelectorAll("[data-view]").forEach(button => listen(button, "click", closeMobileNavigation));
+listen("#timeLogsClock", "click", toggleClock);
+listen("#openActivityLogs", "click", openModal);
+listen("#activityLogsList", "click", event => {
   const editButton = event.target.closest("[data-edit-activity]");
   const button = event.target.closest("[data-delete-activity]");
   if (editButton) openEditActivity(editButton.dataset.editActivity);
   if (button) deleteActivity(button.dataset.deleteActivity);
 });
-$("#activitySearch").addEventListener("input", event => { state.activityFilters.search = event.target.value; renderSecondaryViews(); });
-$("#activityCategoryFilter").addEventListener("change", event => { state.activityFilters.category = event.target.value; renderSecondaryViews(); });
-$("#activityDateFilter").addEventListener("change", event => { state.activityFilters.date = event.target.value; renderSecondaryViews(); });
-$("#clearActivityFilters").addEventListener("click", () => {
+listen("#activitySearch", "input", event => { state.activityFilters.search = event.target.value; renderSecondaryViews(); });
+listen("#activityCategoryFilter", "change", event => { state.activityFilters.category = event.target.value; renderSecondaryViews(); });
+listen("#activityDateFilter", "change", event => { state.activityFilters.date = event.target.value; renderSecondaryViews(); });
+listen("#clearActivityFilters", "click", () => {
   state.activityFilters = { search: "", category: "", date: "" };
   $("#activitySearch").value = "";
   $("#activityCategoryFilter").value = "";
   $("#activityDateFilter").value = "";
   renderSecondaryViews();
 });
-$("#reportStart").addEventListener("change", event => { state.reportRange.start = event.target.value; renderSecondaryViews(); });
-$("#reportEnd").addEventListener("change", event => { state.reportRange.end = event.target.value; renderSecondaryViews(); });
-$("#clearReportRange").addEventListener("click", () => {
+listen("#reportStart", "change", event => { state.reportRange.start = event.target.value; renderSecondaryViews(); });
+listen("#reportEnd", "change", event => { state.reportRange.end = event.target.value; renderSecondaryViews(); });
+listen("#clearReportRange", "click", () => {
   state.reportRange = { start: "", end: "" };
   $("#reportStart").value = "";
   $("#reportEnd").value = "";
   renderSecondaryViews();
 });
-$("#printReport").addEventListener("click", printReport);
-$("#exportReport").addEventListener("click", exportReport);
-$("#signOut").addEventListener("click", async event => {
+listen("#printReport", "click", printReport);
+listen("#exportReport", "click", exportReport);
+listen("#signOut", "click", async event => {
   const button = event.currentTarget;
   button.disabled = true;
   button.querySelector(".signout-label").textContent = "Signing out…";

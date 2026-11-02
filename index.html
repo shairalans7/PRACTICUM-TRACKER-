@@ -123,7 +123,8 @@
     body::after { position: fixed; z-index: -1; inset: 0; content: ""; pointer-events: none; background: radial-gradient(circle at 16% 18%, var(--glow-blue), transparent 32%), radial-gradient(circle at 82% 20%, var(--glow-cyan), transparent 30%); mix-blend-mode: screen; opacity: .8; }
     aside { color: var(--text); background: var(--sidebar); box-shadow: 16px 0 50px var(--shadow); backdrop-filter: blur(24px) saturate(135%); }
     .profile small { color: var(--muted); font-size: 12px; }
-    nav span { color: #d5e4ee; }
+    nav span { color: var(--text); }
+    :root[data-theme="dark"] nav span { color: #d5e4ee; }
     nav span.active, nav span:hover { background: var(--surface-strong); color: var(--text); }
     .profile { background: var(--sidebar-soft); border: 1px solid var(--border); }
     .card, .setup { border-color: var(--border); background: var(--surface); box-shadow: 0 16px 45px var(--shadow); backdrop-filter: blur(22px); }
